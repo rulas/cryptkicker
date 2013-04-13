@@ -19,7 +19,7 @@ class CryptKicker():
         """
 
         #TODO: we may want to pass the dictionary as an object, instead of creating here.
-        self.__spanish_dictionary = SpanishDict('../../dictionaries/CREA_total.TXT', maxentries=100000)
+        self.__spanish_dictionary = SpanishDict('./dictionaries/CREA_total.TXT', maxentries=100000)
 
         self.set_phrase_seed(phrase, seed)
 
@@ -34,26 +34,32 @@ class CryptKicker():
         self.__phrase_words_list = self.phrase.split()
         self.__phrase_words_set = set(self.__phrase_words_list)
         self.__seed_words_list = self.seed.split()
+
         # make a dictionary for all words to be translated
         self.__words_translation_dict = {}
         for word in self.__phrase_words_set:
             self.__words_translation_dict[word] = '*' * len(word)
-            # self.__decryption_mask = {}
-        # for word in self.__phrase_words_list:
-        #     self.update_decrypt_dict(word, word, '*' * len(word))
+
         # make a dictionary that contains letter translation for decryption
         self.__character_translation_dict = {}
 
+        # this will tell us the number of unknown words so far
+        self.__unknown_words_list = self.__get_unkown_words()
+        self.__unknown_words = len(self.__unknown_words_list)
+        self.__decryption_attempts = 0
+        self.__decrypted = False
+
+
     def decrypt(self):
         """
-
+	performs full decryption
         """
         # process seed so that we can at least decrypt some words
         self.__decrypt_using_seed()
         # decrypt the remaining words
-        self.decrypted = self.__decrypt_unknown_words()
+        self.__decrypt_unknown_words()
        
-    def __print_progress(self, long=False, enable=False):
+    def __print_progress(self, long=False, enable=0):
         """
         prints a summary of decryption process
         """
@@ -99,7 +105,7 @@ class CryptKicker():
         if not seed_position:
             raise ValueError("seed was not found within phrase, we can not continue")
         
-        # once found marks those words as decrypted and update the translation dictionary accordingly
+        # once found marks those words as __decrypted and update the translation dictionary accordingly
         seed_length = len(self.__seed_words_list)
         start = seed_position
         end = seed_position + seed_length
@@ -108,7 +114,7 @@ class CryptKicker():
         for encrypted, decrypted  in zip(found_words, self.__seed_words_list):
             self.__update_translation(encrypted, decrypted)
         
-        # process the remaining words and decrypt all the known letters and mark those letters as decrypted
+        # process the remaining words and decrypt all the known letters and mark those letters as __decrypted
         self.__propagate_update()
         self.__print_progress(long=True)
         
@@ -161,41 +167,103 @@ class CryptKicker():
 
         self.__words_translation_dict[word] = found_word
 
-    def __decrypt_unknown_words(self):
-        # find all words with unknown chars
+    def __get_unkown_words(self):
         unknown_words = []
         for word in self.__phrase_words_set:
             if '*' in self.__words_translation_dict[word]:
                 unknown_words.append(word)
 
-        # if not unkownn words, then we are done. just return.
-        if not unknown_words:
-            #FIMXE: add check to stop if we can not continue decrypting words
-            return True
-            
-        # order words by higher ratio of unknown versus known chars
-        ordered_unknown_words = sorted(unknown_words, key=lambda word: self.__words_translation_dict[word].count('*')/len(self.__words_translation_dict[word]))
-        ordered_unknown_words = [self.__words_translation_dict[word] for word in ordered_unknown_words]
+        self.__unknown_words = len(unknown_words)
+        return unknown_words
 
-        first_unknown_word = ordered_unknown_words[0]
+    def __guess_word(self, unknown_word):
+        """
+        guess the word
+        """
+        nearest_words = self.__spanish_dictionary.find_nearest(str(unknown_word))
 
-        nearest_word = self.__spanish_dictionary.findnearest(str(first_unknown_word))
-        
-        # find the key of value within the words_translation_dict
+        return nearest_words
+
+    def __count_char_differences(self, word1, word2):
+        count = 0
+        # count different characters
+        for char1, char2 in zip(word1, word2):
+            if char1 != char2:
+                count += 1
+
+        return count
+
+    def __find_dict_key_from_value(self, value):
+        """
+        find the key of value within the words_translation_dict
+        """
         word_key = None
-        for key, value in self.__words_translation_dict.iteritems():
-            if value == first_unknown_word:
-                word_key = key
+        for k, v in self.__words_translation_dict.iteritems():
+            if v == value:
+                word_key = k
                 break
-                
-        self.__update_translation(word_key, nearest_word)
-        self.__propagate_update()
-        self.__print_progress()
 
-        # recursion
-        self.__decrypt_unknown_words()
-                    
-    
+        return word_key
+
+    def __decrypt_unknown_words(self):
+        # find all words with unknown chars
+        unknown_words = self.__get_unkown_words()
+        remaining_attempts = 3
+        words_found = 0
+
+        # FIRST PASS
+        # attempt to guess the word using a dictionary, but only if the number of possible words that can fit in the
+        # unencrypted word is 1 choice. we need to be really sure we find the exact word here.
+        while unknown_words and remaining_attempts:
+            # order words by higher ratio of unknown versus known chars
+            # ordered_unknown_words = sorted(unknown_words, key=lambda word: \
+            #         self.__words_translation_dict[word].count('*')/len(self.__words_translation_dict[word]))
+            # ordered_unknown_words = [self.__words_translation_dict[word] for word in ordered_unknown_words]
+
+            #print "unknown words: %s" % (unknown_words)
+            # guess word. A word is found if only one word was returned.
+            for word in unknown_words:
+                word = self.__words_translation_dict[word]
+                guessed_words = self.__guess_word(word)
+
+                if len(guessed_words) == 1:
+                    #print "**** 1 word found: %s ****" % (guessed_words[0])
+                    # find the key associated to word in order to update
+                    key = self.__find_dict_key_from_value(word)
+                    # update and propagate findings to all words
+                    self.__update_translation(key, guessed_words[0])
+                    self.__propagate_update()
+                    self.__print_progress()
+                    words_found += 1
+
+            unknown_words = self.__get_unkown_words()
+            remaining_attempts -= 1
+
+        # SECOND PASS
+        # At this state, we know there are still unknown words. However, it seems we will have to predict them
+        # by using the most used words as per the dictionary. there may be another way, but for now this should be
+        # fine
+        if unknown_words:
+
+            for word in unknown_words:
+                word = self.__words_translation_dict[word]
+                guessed_words = self.__guess_word(word)
+
+                char_diff = self.__count_char_differences(word, guessed_words[0])
+
+                if char_diff <= 2:
+                    key = self.__find_dict_key_from_value(word)
+                    self.__update_character_translation_dict(key, guessed_words[0])
+                    self.__update_word_translation_dict(key, guessed_words[0])
+                    self.__propagate_update()
+                    self.__print_progress()
+
+            unknown_words = self.__get_unkown_words()
+
+        if not unknown_words:
+            self.__decrypted = True
+            return
+
     def __update_translation(self, word, found_word):
         """
         indicates that we found a decryption method for word. This is found word
@@ -213,5 +281,8 @@ class CryptKicker():
         returns the result of the decryption
 
         """
-        result = " ".join([self.__words_translation_dict[word] for word in self.__phrase_words_list])
+        if self.__decrypted:
+            result = " ".join([self.__words_translation_dict[word] for word in self.__phrase_words_list])
+        else:
+            result = "NO SE ENCONTRO SOLUCION"
         return result
