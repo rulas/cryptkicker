@@ -6,7 +6,15 @@ from unidecode import unidecode
 
 
 class SpanishDict():
-    
+
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(SpanishDict, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+
     def __init__(self, finput, maxentries):
         
         lines = []
@@ -53,23 +61,30 @@ class SpanishDict():
         for word in self.wordslist:
             self.sizewordsdict[len(word)].append(word)
 
-    def wordexists(self, name):
+    def __find_word_differences(self, string1, string2):
+        """
+        compares two string character by character and returns the number of chars that
+        don't match
+        @param string1
+        @param string2
+        """
+        return len([True for char1, char2 in zip(string1, string2) if char1 != char2])
+
+    def word_exists(self, name):
         return name in self.wordslist
 
-    def findnearest(self, name, maxdist=1):
-        wordslist = self.sizewordsdict[len(name)]
-#         for word in wordslist:
-#             print word, name, lv.distance(name, word)
-        distances = [lv.distance(name, word) for word in wordslist]
-        mindistance = min(distances)
-        mindistances = []
-        nearestwords = []
-        for index, distance in enumerate(distances):
-            if distance == mindistance:
-                mindistances.append(index)
-                nearestwords.append(wordslist[index])
-        
-        return nearestwords[0]
+    def find_nearest(self, name, maxdist=1):
+        # get the list of words that matches the length of name
+        same_length_words = self.sizewordsdict[len(name)]
+
+        # calculate the difference
+        word_differences = [(self.__find_word_differences(word, name), word) for word in same_length_words]
+
+        min_difference = min([num for num, word in word_differences])
+
+        nearest_words = [word for num, word in word_differences if num == min_difference]
+
+        return nearest_words
                 
     def __getitem__(self, name):
         pass
