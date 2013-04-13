@@ -1,14 +1,19 @@
-'''
+# coding=utf-8
+"""
 Created on Apr 8, 2013
 
 @author: Raul Villanueva
-'''
+"""
 
 from __future__ import division
 from spanishdict import SpanishDict
-import re
 
-class CryptKicker():
+
+class CryptKicker(object):
+
+    """
+
+    """
 
     def __init__(self, phrase, seed):
         """
@@ -28,6 +33,8 @@ class CryptKicker():
     def set_phrase_seed(self, phrase, seed):
         """
 
+        :param seed:
+        :param phrase:
         """
         self.phrase = phrase
         self.seed = seed
@@ -59,12 +66,12 @@ class CryptKicker():
         # decrypt the remaining words
         self.__decrypt_unknown_words()
        
-    def __print_progress(self, long=False, enable=0):
+    def __print_progress(self, verbose=False, enable=0):
         """
         prints a summary of decryption process
         """
         if enable:
-            if long:
+            if verbose:
                 print "\n%s" % " ".join([item for item in self.__character_translation_dict.keys()])
                 print "%s" % " ".join([item for item in self.__character_translation_dict.values()])
                 print "==> %s" % self.phrase
@@ -116,7 +123,7 @@ class CryptKicker():
         
         # process the remaining words and decrypt all the known letters and mark those letters as __decrypted
         self.__propagate_update()
-        self.__print_progress(long=True)
+        self.__print_progress(verbose=True)
         
         
     def __propagate_update(self):

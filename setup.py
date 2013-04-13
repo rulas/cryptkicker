@@ -1,3 +1,4 @@
+# coding=utf-8
 from distutils.core import setup
 
 setup(
@@ -8,5 +9,5 @@ setup(
     license='',
     author='Raul Villanueva',
     author_email='raulvlopez@gmail.com',
-    description='This is a simple tool that performs a basic decryption of a phrase'
+    description='This is a simple tool that performs a basic decryption of a phrase', requires=['unidecode']
 )

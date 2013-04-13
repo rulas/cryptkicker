@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-import Levenshtein as lv
 from unidecode import unidecode
 
 
-class SpanishDict():
+class SpanishDict(object):
 
+    """
+
+    """
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -18,7 +20,7 @@ class SpanishDict():
     def __init__(self, finput, maxentries):
         
         lines = []
-        
+        ffile = None
         try:
             ffile = open(finput)
             lines = ffile.readlines()
@@ -33,7 +35,7 @@ class SpanishDict():
         self.sizewordsdict = {}
             
         self.__build_words_list(lines)
-        self.__build_word_size_list(lines)
+        self.__build_word_size_list()
          
         
         del lines    
@@ -52,7 +54,7 @@ class SpanishDict():
             if not remaining_entries:
                 break 
             
-    def __build_word_size_list(self, lines):
+    def __build_word_size_list(self):
         # initializes the dictionary to contain a list each
         for index in range(0,50):
             self.sizewordsdict[index] = []
@@ -73,8 +75,13 @@ class SpanishDict():
     def word_exists(self, name):
         return name in self.wordslist
 
-    def find_nearest(self, name, maxdist=1):
+    def find_nearest(self, name):
         # get the list of words that matches the length of name
+        """
+
+        :param name:
+        :return:
+        """
         same_length_words = self.sizewordsdict[len(name)]
 
         # calculate the difference
@@ -86,19 +93,7 @@ class SpanishDict():
 
         return nearest_words
                 
-    def __getitem__(self, name):
-        pass
-    
-    def __contains__(self, name):
-        pass
-    
-    def has_key(self, name):
-        pass
 
-    
-    
-    
-            
-            
+
 if __name__ == '__main__':
     pass

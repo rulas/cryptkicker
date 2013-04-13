@@ -1,35 +1,45 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-import fileinput
 import sys
 from cryptkicker.cryptkicker import CryptKicker
 
 def decrypt(phrase, seed):
+    """
+
+    :param phrase: phrase to be decrypted
+    :param seed: seed that indictes a sentence that we know is within phrase
+    :return:
+    """
     ck = CryptKicker(phrase, seed)
     return ck.get_decrypted_text()
 
 
 
-def parse_input(finput):
+def parse_input(file_input):
     """
-    receives a file handler and parses the number of phrases and the prahses to be __decrypted
-    TODO: add checks for maximum 100 phrases 
-    TODO: add checks for maximi 100 chars length for each line
+    receives a file handler and parses the number of phrases and the phrases to be __decrypted
+    :param file_input: file to be used as input
+    TODO: add checks for maximum 100 phrases
+    TODO: add checks for maximum 100 chars length for each line
     """
-    class States():
+    class States(object):
+        """
+        class used to emulate an enumeration
+        """
         SEARCH_NUM, SEARCH_BLANK, SEARCH_PHRASE, IN_PHRASE, END, ABORTING = range(6)
 
     state = States.SEARCH_NUM
     remaining_phrases = 0
     phrases = list()
     current_phrase = str()
-    lines = finput.readlines()
+    lines = file_input.readlines()
 
     for line in lines:
         
         if state == States.SEARCH_NUM:
             # print "CS: SEARCH_NUM"
+            # noinspection PyUnusedLocal
             try:
                 remaining_phrases = int(line.strip())
                 if remaining_phrases:
@@ -87,6 +97,10 @@ def parse_input(finput):
 
 def main(args):
     #process each of the files submitted as input
+    """
+    main function
+    :param args:
+    """
     for fpath in args:
         # process the input fpath for input pharases to be __decrypted
         phrases = None

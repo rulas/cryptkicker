@@ -2,16 +2,14 @@
 # -*- coding: utf-8 -*- 
 
 
-'''
+"""
 Created on Apr 8, 2013
 
 @author: lrvillan
-'''
+"""
 import random
-from symbol import while_stmt
 
 import unittest
-import timeit
 
 from cryptkicker.spanishdict import SpanishDict
 
@@ -45,7 +43,7 @@ class TestSpanishDict(unittest.TestCase):
         word_chars = list(word)
         remaining_words = num_words
 
-        while(remaining_words):
+        while remaining_words:
             new_word = word
             samples = random.sample(word_chars, num_chars)
             for sample in samples:

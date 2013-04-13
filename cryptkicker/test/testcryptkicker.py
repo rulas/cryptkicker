@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-'''
+"""
 Created on Apr 8, 2013
 
 @author: lrvillan
-'''
+"""
 
 import unittest
 import sys
@@ -28,11 +28,6 @@ class TestCryptKicker(unittest.TestCase):
         pass
 
 
-    def testFindSeedPos(self):       
-        ck = CryptKicker(self.phrase, self.seed)
-        position = ck.__find_seed_pos()
-        self.assertEquals(position, 14)        
-    
     def testProcessSeed(self):
         # ck = CryptKicker(self.phrase, self.seed)
         # ck.__decrypt_using_seed()
