@@ -55,6 +55,7 @@ class TestSpanishDict(unittest.TestCase):
 
         return words_list
 
+    @unittest.SkipTest
     def testFindNearest(self):
 
         for word in self.__generate_words_chars_hidden('hola', 1, 4):

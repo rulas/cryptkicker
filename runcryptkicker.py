@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 import sys
 from cryptkicker.cryptkicker import CryptKicker
@@ -36,7 +36,7 @@ def parse_input(file_input):
     lines = file_input.readlines()
 
     for line in lines:
-        
+
         if state == States.SEARCH_NUM:
             # print "CS: SEARCH_NUM"
             # noinspection PyUnusedLocal
@@ -52,13 +52,13 @@ def parse_input(file_input):
             except ValueError as e:
                 # print "NS: ABORTING"
                 state = States.ABORTING
-                
+
         elif state == States.SEARCH_BLANK:
             # print "CS: SEARCH_BLANK"
             if line.strip() == '':
                 state = States.SEARCH_PHRASE
                 # print "NS: SEARCH_PHRASE"
-            
+
         elif state == States.SEARCH_PHRASE:
             # print "CS: SEARCH_PHRASE"
             if line.strip() == '':
@@ -67,7 +67,7 @@ def parse_input(file_input):
                     current_phrase += line.strip()
                     state = States.IN_PHRASE
                     # print "NS: IN_PHRASE"
-                    
+
         elif state == States.IN_PHRASE:
             # print "CS: SEARCH_PHRASE"
             if line.strip() == '':
@@ -84,14 +84,14 @@ def parse_input(file_input):
         elif state == States.END:
             # print "CS: END"
             pass
-        
+
         elif state == States.ABORTING:
             # print "CS: ABORTING"
             break
-        
+
     if current_phrase:
         phrases.append(current_phrase)
-        
+
     return phrases
 
 
@@ -113,18 +113,13 @@ def main(args):
         if not phrases:
             print "No phrases to be decrypted. Quitting"
             sys.exit(-1)
-        
+
         # decrypt each phrase individually
         seed = u"la zorra cafe rapidamente brinco sobre el perro negro"
         for phrase in phrases:
             print decrypt(phrase, seed)
-            
-            
+
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-    
-    
-
-

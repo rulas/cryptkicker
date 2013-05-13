@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-from unidecode import unidecode
+# from unidecode import unidecode
+import sys
 
 
 class SpanishDict(object):
@@ -49,11 +50,16 @@ class SpanishDict(object):
         
         for line in lines[1:]:
             # 2nd column is the key
-            self.wordslist.append(unidecode(line.split()[1]))
-            remaining_entries -= 1
-            if not remaining_entries:
-                break 
-            
+            # self.wordslist.append(unidecode(line.split()[1]))
+            try:
+                self.wordslist.append(line.split()[1])
+                remaining_entries -= 1
+                if not remaining_entries:
+                    break
+            except:
+                print "Unexpected error:", sys.exc_info()[0]
+                raise
+
     def __build_word_size_list(self):
         # initializes the dictionary to contain a list each
         for index in range(0,50):
