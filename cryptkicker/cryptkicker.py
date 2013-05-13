@@ -1,4 +1,5 @@
-# coding=utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Created on Apr 8, 2013
 
@@ -7,6 +8,7 @@ Created on Apr 8, 2013
 
 from __future__ import division
 from spanishdict import SpanishDict
+from unicode_helper import to_unicode_or_bust as to_unicode
 
 
 class CryptKicker(object):
@@ -66,7 +68,7 @@ class CryptKicker(object):
         # decrypt the remaining words
         self.__decrypt_unknown_words()
        
-    def __print_progress(self, verbose=False, enable=0):
+    def __print_progress(self, verbose=0, enable=0):
         """
         prints a summary of decryption process
         """
@@ -206,9 +208,14 @@ class CryptKicker(object):
         """
         word_key = None
         for k, v in self.__words_translation_dict.iteritems():
-            if v == value:
-                word_key = k
-                break
+            try:
+                if v == value:
+                    word_key = k
+                    break
+            except UnicodeDecodeError, e:
+                import pdb; pdb.set_trace()
+		pass
+                
 
         return word_key
 
@@ -289,7 +296,17 @@ class CryptKicker(object):
 
         """
         if self.__decrypted:
-            result = " ".join([self.__words_translation_dict[word] for word in self.__phrase_words_list])
+            result = u""
+            for word in self.__phrase_words_list:
+                try:
+                    w = self.__words_translation_dict[word]
+                    #if isinstance(w, str):
+                    #    w = w.decode('utf-8', errors='replace')# unicode(w, errors='replace')
+                    result = "%s %s" % (result, w)
+                #result = " ".join([self.__words_translation_dict[word] for word in self.__phrase_words_list])
+                except UnicodeDecodeError, e:
+                    import pdb; pdb.set_trace()
+                    pass
         else:
             result = "NO SE ENCONTRO SOLUCION"
         return result

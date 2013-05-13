@@ -3,6 +3,9 @@
 
 import sys
 from cryptkicker.cryptkicker import CryptKicker
+import codecs
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def decrypt(phrase, seed):
     """
@@ -101,23 +104,30 @@ def main(args):
     main function
     :param args:
     """
-    for fpath in args:
-        # process the input fpath for input pharases to be __decrypted
-        phrases = None
-        try:
-            print "Processing: %s file" % fpath
-            phrases = parse_input(open(fpath))
-        except IOError, e:
-            print e
+    try:
+        fpath = args[0]
+        seed = args[1]
+    except IndexError:
+        print "usage: runcryptkicker.py input_file \"seed_phrase\""
+        sys.exit(-1)
 
-        if not phrases:
-            print "No phrases to be decrypted. Quitting"
-            sys.exit(-1)
+    phrases = None
+    try:
+        print "Processing: %s file" % fpath
+        phrases = parse_input(codecs.open(fpath, 'r', encoding='latin-1'))
+    except IOError, e:
+        print e
 
-        # decrypt each phrase individually
-        seed = u"la zorra cafe rapidamente brinco sobre el perro negro"
-        for phrase in phrases:
-            print decrypt(phrase, seed)
+    if not phrases:
+        print "No phrases to be decrypted. Quitting"
+        sys.exit(-1)
+
+    # decrypt each phrase individually
+    #seed = u"la zorra cafe rapidamente brinco sobre el perro negro"
+    print "phrase seed = %s\n" % seed
+    for phrase in phrases:
+        print decrypt(phrase, seed)
+        print ""
 
 
 

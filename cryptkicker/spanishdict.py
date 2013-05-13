@@ -3,7 +3,8 @@
 
 # from unidecode import unidecode
 import sys
-
+import codecs
+from unicode_helper import to_unicode_or_bust as to_unicode
 
 class SpanishDict(object):
 
@@ -23,7 +24,7 @@ class SpanishDict(object):
         lines = []
         ffile = None
         try:
-            ffile = open(finput)
+            ffile = codecs.open(finput, 'r', encoding='latin-1')
             lines = ffile.readlines()
         except IOError as e:
             print e
@@ -52,11 +53,13 @@ class SpanishDict(object):
             # 2nd column is the key
             # self.wordslist.append(unidecode(line.split()[1]))
             try:
-                self.wordslist.append(line.split()[1])
+		#import pdb; pdb.set_trace()
+                self.wordslist.append(to_unicode(line.split()[1]))
                 remaining_entries -= 1
                 if not remaining_entries:
                     break
             except:
+		import pdb; pdb.set_trace()
                 print "Unexpected error:", sys.exc_info()[0]
                 raise
 
