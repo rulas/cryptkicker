@@ -8,6 +8,6 @@ setup(
     url='',
     license='',
     author='Raul Villanueva',
-    author_email='raulvlopez@gmail.com',
+    author_email='raulvlopez AT gmail DOT com',
     description='This is a simple tool that performs a basic decryption of a phrase', requires=['unidecode']
 )
